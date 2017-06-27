@@ -11,6 +11,7 @@ import httplib2
 import json
 from flask import make_response
 import requests
+#  from oath_logins import google
 
 app = Flask(__name__)
 
@@ -26,6 +27,18 @@ session = DBSession()
 @app.route('/')
 def showHome():
         return render_template('home.html')
+
+
+@app.route('/login')
+def showLogin():
+    #  Create anti-forgery state token
+    state = ''.join(random.choice(string.ascii_uppercase + string.digits)
+                    for x in xrange(32))
+    login_session['state'] = state
+    # return "The current session state is %s" % login_session['state']
+    return render_template('login.html', state=state)
+
+
 
 
 if __name__ == '__main__':
