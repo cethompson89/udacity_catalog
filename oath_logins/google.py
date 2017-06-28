@@ -7,13 +7,7 @@ from flask import make_response
 import requests
 
 
-def validate_user(returned_state, code):
-    # Validate state token
-    if returned_state != login_session['state']:
-        response = make_response(json.dumps('Invalid state parameter.'), 401)
-        response.headers['Content-Type'] = 'application/json'
-        return response
-
+def validate_user(code):
     try:
         # Upgrade the authorization code into a credentials object
         oauth_flow = flow_from_clientsecrets('client_secrets.json', scope='')

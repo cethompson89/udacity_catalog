@@ -12,7 +12,8 @@ import json
 from flask import make_response
 import requests
 import oath_logins.google as google
-from helper import render
+import oath_logins.facebook as facebook
+from helper import render, test_state
 
 app = Flask(__name__)
 
@@ -45,26 +46,52 @@ def gconnect():
     returned_state = request.args.get('state')
     code = request.data
 
-    (failure_reponse, access_token, gplus_id) = google.validate_user(returned_state, code)
+    failure_reponse = test_state(returned_state)
     if failure_reponse:
         return failure_reponse
 
-    # Store the access token in the session for later use.
-    login_session['access_token'] = access_token
-    login_session['gplus_id'] = gplus_id
+    (failure_reponse, access_token, gplus_id) = google.validate_user(code)
+    if failure_reponse:
+        return failure_reponse
 
     (username, picture, email) = google.get_user_info(access_token)
+
+    login_session['access_token'] = access_token
+    login_session['gplus_id'] = gplus_id
     login_session['username'] = username
     login_session['picture'] = picture
     login_session['email'] = email
     login_session['provider'] = 'google'
 
+    output = "<h1>Welcome, %s!</h1>" % login_session['username']
     flash("you are now logged in as %s" % login_session['username'])
+    return output
+
+
+@app.route('/fbconnect', methods=['POST'])
+def fbconnect():
+    returned_state = request.args.get('state')
+    access_token = request.data
+
+    failure_reponse = test_state(returned_state)
+    if failure_reponse:
+        return failure_reponse
+
+    token = facebook.validate_user(access_token)
+
+    (username, picture, email, facebook_id) = facebook.get_user_info(token)
+
+    login_session['access_token'] = token
+    login_session['facebook_id'] = facebook_id
+    login_session['username'] = username
+    login_session['picture'] = picture
+    login_session['email'] = email
+    login_session['provider'] = 'facebook'
 
     output = "<h1>Welcome, %s!</h1>" % login_session['username']
     flash("you are now logged in as %s" % login_session['username'])
-    print "done!"
     return output
+
 
 
 # Disconnect based on provider
@@ -76,10 +103,10 @@ def disconnect():
             if response:
                 return response
             del login_session['gplus_id']
-            del login_session['access_token']
-            # if login_session['provider'] == 'facebook':
-            #     fbdisconnect()
-            #     del login_session['facebook_id']
+        if login_session['provider'] == 'facebook':
+            facebook.logout(login_session['facebook_id'], login_session['access_token'])
+            del login_session['facebook_id']
+        del login_session['access_token']
         del login_session['username']
         del login_session['email']
         del login_session['picture']

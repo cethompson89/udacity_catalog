@@ -55,6 +55,8 @@
           <li><a href="/login"><span class="glyphicon glyphicon-log-in"></span> Login/Signup</a></li>
           {% else %}
           <li><a>{{username}}</a></li>
+          <li><img src={{picture}} height="30" class="move-image" alt="Profile picture"></li>
+
           <li><a href="/disconnect"><span class="glyphicon glyphicon-log-out"></span> Logout</a></li>
           {% endif %}
         </ul>
