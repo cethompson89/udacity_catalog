@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, jsonify, url_for, flash
+from flask import Flask, request, redirect, jsonify, url_for, flash
 from sqlalchemy import create_engine, asc
 from sqlalchemy.orm import sessionmaker
 from models import Base, Category, Item, User
@@ -12,6 +12,7 @@ import json
 from flask import make_response
 import requests
 import oath_logins.google as google
+from helper import render
 
 app = Flask(__name__)
 
@@ -26,7 +27,7 @@ session = DBSession()
 # Show all restaurants
 @app.route('/')
 def showHome():
-        return render_template('home.html')
+        return render('home.html')
 
 
 @app.route('/login')
@@ -36,7 +37,7 @@ def showLogin():
                     for x in xrange(32))
     login_session['state'] = state
     # return "The current session state is %s" % login_session['state']
-    return render_template('login.html', state=state)
+    return render('login.html', state=state)
 
 
 @app.route('/gconnect', methods=['POST'])
@@ -65,6 +66,30 @@ def gconnect():
     print "done!"
     return output
 
+
+# Disconnect based on provider
+@app.route('/disconnect')
+def disconnect():
+    if 'provider' in login_session:
+        if login_session['provider'] == 'google':
+            response = google.logout(login_session['access_token'])
+            if response:
+                return response
+            del login_session['gplus_id']
+            del login_session['access_token']
+            # if login_session['provider'] == 'facebook':
+            #     fbdisconnect()
+            #     del login_session['facebook_id']
+        del login_session['username']
+        del login_session['email']
+        del login_session['picture']
+#        del login_session['user_id']
+        del login_session['provider']
+        flash("You have successfully been logged out.")
+        return redirect(url_for('showHome'))
+    else:
+        flash("You were not logged in")
+        return redirect(url_for('showHome'))
 
 
 if __name__ == '__main__':
