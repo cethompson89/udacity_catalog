@@ -25,7 +25,7 @@ DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
 
-# Show all restaurants
+# Show homepage
 @app.route('/')
 def showHome():
         return render('home.html')
@@ -63,6 +63,12 @@ def gconnect():
     login_session['email'] = email
     login_session['provider'] = 'google'
 
+    # see if user exists
+    user_id = User.getUserID(login_session['email'])
+    if not user_id:
+        user_id = User.createUser(login_session)
+    login_session['user_id'] = user_id
+
     output = "<h1>Welcome, %s!</h1>" % login_session['username']
     flash("you are now logged in as %s" % login_session['username'])
     return output
@@ -87,6 +93,12 @@ def fbconnect():
     login_session['picture'] = picture
     login_session['email'] = email
     login_session['provider'] = 'facebook'
+
+    # see if user exists
+    user_id = User.getUserID(login_session['email'])
+    if not user_id:
+        user_id = User.createUser(login_session)
+    login_session['user_id'] = user_id
 
     output = "<h1>Welcome, %s!</h1>" % login_session['username']
     flash("you are now logged in as %s" % login_session['username'])
