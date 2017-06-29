@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}
+  Create Item
+{% endblock %}
+
+{% block content %}
+
+  <div class="container">
+  <div class="row">
+
+    <div class="col-sm-12">
+      <button class="btn btn-default" onclick="goBack()">Go back</button>
+    </div>
+
+  </div>
+  <br>
+  <br>
+  <div class="row">
+    <div class="col-sm-12">
+
+      <form class="form-horizontal" method="post">
+
+        <input type="hidden" name="item_id" value="{{ item_id }}">
+
+        <div class="form-group">
+          <label for="name">Item Name</label>
+            <input type="text" class="form-control" name="name" id="name" placeholder="Item Name" value="{{ name }}">
+            <p class="form-control-static" style="color:red">{{ name_error }}</p>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="description">Description</label>
+          <textarea class="form-control" id="description" name="description" rows="4">{{ description }}</textarea>
+          <p class="form-control-static" style="color:red">{{ description_error }}</p>
+        </div>
+
+        <div class="form-group">
+          <label for="category">Category</label>
+          <select class="custom-select" name="category" id="category">
+            {% for category in categories %}
+              {% if category.name == item_category %}
+                <option selected>{{category.name}}</option>
+              {% else %}
+                <option>{{category.name}}</option>
+              {% endif %}
+            {% endfor %}
+          </select>
+        </div>
+
+        <br>
+
+        <div class="form-group">
+            <button type="submit" class="btn btn-default">Submit</button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+  </div>
+
+{% endblock %}

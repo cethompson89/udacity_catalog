@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}
+  Create Item
+{% endblock %}
+
+{% block content %}
+
+  <div class="container">
+  <div class="row">
+
+    <div class="col-sm-12">
+      <button class="btn btn-default" onclick="goBack()">Go back</button>
+    </div>
+
+  </div>
+  <br>
+  <br>
+  <div class="row">
+    <div class="col-sm-12">
+
+      <form class="form-horizontal" method="post">
+
+        <input type="hidden" name="item_id" value="{{ item_id }}">
+
+        <p> Do you really want to delete {{item.name}}?</p>
+
+        <div class="form-group">
+            <button type="submit" class="btn btn-default">Delete</button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+  </div>
+
+{% endblock %}

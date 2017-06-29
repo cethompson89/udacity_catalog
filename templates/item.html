@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}
+  {{item.name}}
+{% endblock %}
+
+{% block content %}
+
+  <div class="container">
+    <div class="row">
+    <div class="col-sm-12">
+
+      <h2>{{item.name}}</h2>
+      <h2 class="small">{{item.category.name}}</h2>
+
+      <br>
+
+      <p>{{item.description}}</p>
+
+      {% if username %}
+      <br>
+      <p><a href="/edit-{{item.id}}" style="color:red">Edit</a> | <a href="/delete-{{item.id}}" style="color:red">Delete</a></p>
+      {% endif %}
+
+    </div>
+  </div>
+  </div>
+
+{% endblock %}

@@ -47,9 +47,11 @@
         <div class="navbar-header">
           <a class="navbar-brand" href="/">CatLog</a>
         </div>
-        <ul class="nav navbar-nav">
-        <li><a href="/newpost">Add Item</a></li>
-        </ul>
+        {% if username %}
+          <ul class="nav navbar-nav">
+          <li><a href="/newitem">Add Item</a></li>
+          </ul>
+        {% endif %}
         <ul class="nav navbar-nav navbar-right">
           {% if not username %}
           <li><a href="/login"><span class="glyphicon glyphicon-log-in"></span> Login/Signup</a></li>

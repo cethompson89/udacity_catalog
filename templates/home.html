@@ -12,18 +12,29 @@
       <br>
       <ul class="list-group">
         {% for category in categories %}
-            <a href="#" class="list-group-item h4">{{ category.name }}</a>
+            {% if category.id == selected_category.id %}
+              <a href="/category-{{category.id}}" class="list-group-item h4 active">{{ category.name }}</a>
+            {% else %}
+              <a href="/category-{{category.id}}" class="list-group-item h4">{{ category.name }}</a>
+            {% endif %}
         {% endfor %}
       </ul>
     </div>
     <div class="col-sm-1">
     </div>
     <div class="col-sm-7">
-      <h2>Latest Items</h2>
+      <h2>
+        {% if selected_category %}
+          {{ selected_category.name }} <small>({{items|length}} items)</small>
+        {% else %}
+          Latest Items
+        {% endif %}
+      </h2>
       <br>
-
-        <p class="h4"><a href="#">List item 1</a>&nbsp &nbsp<small><i>(Test test)</i></small></p>
+        {% for item in items %}
+        <p class="h4"><a href="/item-{{item.id}}">{{item.name}}</a>&nbsp &nbsp<small><i>({{item.category.name}})</i></small></p>
         <br>
+        {% endfor %}
 
     </div>
   </div>

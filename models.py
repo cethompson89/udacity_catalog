@@ -1,7 +1,7 @@
 from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
-from sqlalchemy import create_engine, asc
+from sqlalchemy import create_engine, asc, desc
 from sqlalchemy.orm import sessionmaker
 
 Base = declarative_base()
@@ -63,6 +63,15 @@ class Category(Base):
     def getAllCategories(cls):
         return session.query(cls).order_by(asc(cls.name))
 
+    @classmethod
+    def getCategoryID(cls, category):
+        category = session.query(cls).filter_by(name=category).one()
+        return category.id
+
+    @classmethod
+    def getCategory(cls, category_id):
+        category = session.query(cls).filter_by(id=category_id).one()
+        return category
 
     @property
     def serialize(self):
@@ -76,13 +85,52 @@ class Category(Base):
 class Item(Base):
     __tablename__ = 'item'
 
-    name = Column(String(80), nullable=False)
+    name = Column(String(250), nullable=False)
     id = Column(Integer, primary_key=True)
-    description = Column(String(250))
+    description = Column(String(1000))
     category_id = Column(Integer, ForeignKey('category.id'))
     category = relationship(Category)
     user_id = Column(Integer, ForeignKey('user.id'))
     user = relationship(User)
+
+    @classmethod
+    def createItem(cls, name, description, category_id, user_id):
+        newItem = cls(name=name, description=description, category_id=category_id, user_id=user_id)
+        session.add(newItem)
+        session.commit()
+        item = session.query(cls).filter_by(name=name).order_by(desc(cls.id)).first()
+        return item.id
+
+    @classmethod
+    def updateItem(cls, item_id, name, description, category_id, user_id):
+        editedItem = session.query(cls).filter_by(id=item_id).one()
+        editedItem.name = name
+        editedItem.description = description
+        editedItem.category_id=category_id
+        editedItem.user_id = user_id
+        session.add(editedItem)
+        session.commit()
+
+    @classmethod
+    def deleteItem(cls, item_id):
+        item = session.query(cls).filter_by(id=item_id).one()
+        session.delete(item)
+        session.commit()
+
+
+    @classmethod
+    def getAllItems(cls):
+        return session.query(cls).order_by(desc(cls.id)).all()
+
+    @classmethod
+    def getItemInfo(cls, item_id):
+        item = session.query(cls).filter_by(id=item_id).one()
+        return item
+
+    @classmethod
+    def getByCategory(cls, category_id):
+        items = session.query(cls).filter_by(category_id=category_id).order_by(asc(cls.name)).all()
+        return items
 
     @property
     def serialize(self):

@@ -27,9 +27,16 @@ session = DBSession()
 
 # Show homepage
 @app.route('/')
-def showHome():
+@app.route('/category-<int:category_id>', methods=['GET'])
+def showHome(category_id=None):
         categories = Category.getAllCategories()
-        return render('home.html', categories=categories)
+        if category_id:
+            selected_category = Category.getCategory(category_id)
+            items = Item.getByCategory(category_id)
+        else:
+            selected_category = None
+            items = Item.getAllItems()
+        return render('home.html', categories=categories, items=items, selected_category=selected_category)
 
 
 @app.route('/login')
@@ -123,7 +130,7 @@ def disconnect():
         del login_session['username']
         del login_session['email']
         del login_session['picture']
-#        del login_session['user_id']
+        del login_session['user_id']
         del login_session['provider']
         flash("You have successfully been logged out.")
         return redirect(url_for('showHome'))
@@ -139,10 +146,67 @@ def newCategory():
     if request.method == 'POST':
         category = request.form['category']
         Category.createCategory(category)
-        flash('New Restaurant %s Successfully Created' % category)
+        flash('New Category %s Successfully Created' % category)
         return redirect(url_for('showHome'))
     else:
         return render('newCategory.html')
+
+
+@app.route('/item-<int:item_id>', methods=['GET'])
+def displayItem(item_id):
+    item = Item.getItemInfo(item_id)
+    return render('item.html', item=item)
+
+
+
+@app.route('/edit-<int:item_id>', methods=['GET', 'POST'])
+@app.route('/newitem', methods=['GET', 'POST'])
+def newItem(item_id=None):
+    if 'username' not in login_session:
+        return redirect('/login')
+    if request.method == 'POST':
+        name = request.form['name']
+        description = request.form['description']
+        item_category = request.form['category']
+        if name and description:  # required information
+            category_id = Category.getCategoryID(item_category)
+            user_id = login_session['user_id']
+            if item_id:  # editting item
+                Item.updateItem(item_id, name, description, category_id, user_id)
+                flash('Item %s Successfully Updated' % name)
+            else:  # create new item
+                item_id = Item.createItem(name, description, category_id, user_id)
+                flash('New Item %s Successfully Created' % name)
+            return redirect("/item-%s" % str(item_id))
+        else:  # take user back to form to fix missing data
+            categories = Category.getAllCategories()
+            name_error = ""
+            description_error = ""
+            if not name:
+                name_error = "Name required"
+            if not description:
+                description_error = "Description required"
+            return render('newItem.html', categories=categories, name=name, description=description, item_category=item_category, name_error=name_error, description_error=description_error)
+
+    else:  # render form
+        categories = Category.getAllCategories()
+        name, description, item_category = "", "", ""
+        if item_id:
+            item = Item.getItemInfo(item_id)
+            name = item.name
+            description = item.description
+            item_category = item.category.name
+        return render('newItem.html', categories=categories, name=name, description=description, item_category=item_category)
+
+@app.route('/delete-<int:item_id>', methods=['GET', 'POST'])
+def deleteItem(item_id):
+    if 'username' not in login_session:
+        return redirect('/login')
+    if request.method == 'POST':
+        item_id = request.form['item_id']
+        Item.deleteItem(item_id)
+    else:
+        return render('delete.html', item_id=item_id)
 
 
 if __name__ == '__main__':
