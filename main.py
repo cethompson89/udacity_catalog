@@ -205,8 +205,10 @@ def deleteItem(item_id):
     if request.method == 'POST':
         item_id = request.form['item_id']
         Item.deleteItem(item_id)
+        return redirect(url_for('showHome'))
     else:
-        return render('delete.html', item_id=item_id)
+        item = Item.getItemInfo(item_id)
+        return render('delete.html', item=item)
 
 
 if __name__ == '__main__':
