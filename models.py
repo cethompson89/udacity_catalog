@@ -1,7 +1,7 @@
 from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, asc
 from sqlalchemy.orm import sessionmaker
 
 Base = declarative_base()
@@ -27,7 +27,7 @@ class User(Base):
                        'email'])
         session.add(newUser)
         session.commit()
-        user = session.query(User).filter_by(email=login_session['email']).one()
+        user = session.query(cls).filter_by(email=login_session['email']).one()
         return user.id
 
     @classmethod
@@ -49,6 +49,20 @@ class Category(Base):
 
     id = Column(Integer, primary_key=True)
     name = Column(String(250), nullable=False)
+
+    @classmethod
+    def createCategory(cls, category):
+        try:
+            session.query(cls).filter_by(name=category).one()
+        except:
+            newCategory = cls(name=category)
+            session.add(newCategory)
+            session.commit()
+
+    @classmethod
+    def getAllCategories(cls):
+        return session.query(cls).order_by(asc(cls.name))
+
 
     @property
     def serialize(self):
@@ -79,9 +93,6 @@ class Item(Base):
             'description': self.description,
             'id': self.id,
         }
-
-
-engine = create_engine('sqlite:///catalog.db')
 
 
 Base.metadata.create_all(engine)

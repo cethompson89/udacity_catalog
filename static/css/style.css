@@ -9,6 +9,10 @@ body {
     }
 }
 
+.border-right {
+    border-right: 1px solid black;
+}
+
 hr {
     height: 3px;
     color: #7d97ad; /* old IE */

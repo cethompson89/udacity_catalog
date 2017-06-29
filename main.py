@@ -28,7 +28,8 @@ session = DBSession()
 # Show homepage
 @app.route('/')
 def showHome():
-        return render('home.html')
+        categories = Category.getAllCategories()
+        return render('home.html', categories=categories)
 
 
 @app.route('/login')
@@ -129,6 +130,19 @@ def disconnect():
     else:
         flash("You were not logged in")
         return redirect(url_for('showHome'))
+
+
+@app.route('/category', methods=['GET', 'POST'])
+def newCategory():
+    if 'username' not in login_session:
+        return redirect('/login')
+    if request.method == 'POST':
+        category = request.form['category']
+        Category.createCategory(category)
+        flash('New Restaurant %s Successfully Created' % category)
+        return redirect(url_for('showHome'))
+    else:
+        return render('newCategory.html')
 
 
 if __name__ == '__main__':

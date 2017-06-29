@@ -6,6 +6,29 @@
 
 {% block content %}
 
-Blah blah
+  <div class="row">
+    <div class="col-sm-4 border-right">
+      <h2>Categories</h2>
+      <br>
+      <ul class="list-group">
+        {% for category in categories %}
+            <a href="#" class="list-group-item h4">{{ category.name }}</a>
+        {% endfor %}
+      </ul>
+    </div>
+    <div class="col-sm-1">
+    </div>
+    <div class="col-sm-7">
+      <h2>Latest Items</h2>
+      <br>
+
+        <p class="h4"><a href="#">List item 1</a>&nbsp &nbsp<small><i>(Test test)</i></small></p>
+        <br>
+
+    </div>
+  </div>
+
+
+
 
 {% endblock %}
