@@ -3,6 +3,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy import create_engine, asc, desc
 from sqlalchemy.orm import sessionmaker
+from flask import jsonify
 
 Base = declarative_base()
 
@@ -81,6 +82,17 @@ class Category(Base):
             'id': self.id,
         }
 
+    @property
+    def serialize_with_items(self):
+        """Return object data in easily serializeable format"""
+        items = Item.getByCategory(self.id)
+        item_json = [i.serialize for i in items]
+        return {
+            'Item': item_json,
+            'name': self.name,
+            'id': self.id,
+        }
+
 
 class Item(Base):
     __tablename__ = 'item'
@@ -137,8 +149,8 @@ class Item(Base):
         """Return object data in easily serializeable format"""
         return {
             'cat_id': self.category_id,
-            'name': self.name,
             'description': self.description,
+            'name': self.name,
             'id': self.id,
         }
 

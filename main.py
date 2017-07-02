@@ -198,6 +198,7 @@ def newItem(item_id=None):
             item_category = item.category.name
         return render('newItem.html', categories=categories, name=name, description=description, item_category=item_category)
 
+
 @app.route('/delete-<int:item_id>', methods=['GET', 'POST'])
 def deleteItem(item_id):
     if 'username' not in login_session:
@@ -209,6 +210,19 @@ def deleteItem(item_id):
     else:
         item = Item.getItemInfo(item_id)
         return render('delete.html', item=item)
+
+
+#  Not linked to in site
+@app.route('/category-<int:category_id>/JSON')
+def categoryJSON(category_id):
+    items = Item.getByCategory(category_id)
+    return jsonify(Item=[i.serialize for i in items])
+
+
+@app.route('/JSON')
+def allJSON():
+    categories = Category.getAllCategories()
+    return jsonify(Category=[c.serialize_with_items for c in categories])
 
 
 if __name__ == '__main__':
