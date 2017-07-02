@@ -3,7 +3,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy import create_engine, asc, desc
 from sqlalchemy.orm import sessionmaker
-from flask import jsonify
+
 
 Base = declarative_base()
 
@@ -107,7 +107,8 @@ class Item(Base):
 
     @classmethod
     def createItem(cls, name, description, category_id, user_id):
-        newItem = cls(name=name, description=description, category_id=category_id, user_id=user_id)
+        newItem = cls(name=name, description=description,
+                      category_id=category_id, user_id=user_id)
         session.add(newItem)
         session.commit()
         item = session.query(cls).filter_by(name=name).order_by(desc(cls.id)).first()
@@ -118,7 +119,7 @@ class Item(Base):
         editedItem = session.query(cls).filter_by(id=item_id).one()
         editedItem.name = name
         editedItem.description = description
-        editedItem.category_id=category_id
+        editedItem.category_id = category_id
         editedItem.user_id = user_id
         session.add(editedItem)
         session.commit()
@@ -128,7 +129,6 @@ class Item(Base):
         item = session.query(cls).filter_by(id=item_id).one()
         session.delete(item)
         session.commit()
-
 
     @classmethod
     def getAllItems(cls):

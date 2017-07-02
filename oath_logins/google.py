@@ -72,7 +72,6 @@ def get_user_info(access_token):
     return data['name'], data['picture'], data['email']
 
 
-
 def logout(access_token):
     if access_token is None:
         response = make_response(

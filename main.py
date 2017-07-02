@@ -1,16 +1,10 @@
 from flask import Flask, request, redirect, jsonify, url_for, flash
-from sqlalchemy import create_engine, asc
+from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from models import Base, Category, Item, User
 from flask import session as login_session
 import random
 import string
-from oauth2client.client import flow_from_clientsecrets
-from oauth2client.client import FlowExchangeError
-import httplib2
-import json
-from flask import make_response
-import requests
 import oath_logins.google as google
 import oath_logins.facebook as facebook
 from helper import render, test_state
@@ -36,7 +30,8 @@ def showHome(category_id=None):
         else:
             selected_category = None
             items = Item.getAllItems()
-        return render('home.html', categories=categories, items=items, selected_category=selected_category)
+        return render('home.html', categories=categories, items=items,
+                      selected_category=selected_category)
 
 
 @app.route('/login')
@@ -113,7 +108,6 @@ def fbconnect():
     return output
 
 
-
 # Disconnect based on provider
 @app.route('/disconnect')
 def disconnect():
@@ -124,7 +118,8 @@ def disconnect():
                 return response
             del login_session['gplus_id']
         if login_session['provider'] == 'facebook':
-            facebook.logout(login_session['facebook_id'], login_session['access_token'])
+            facebook.logout(login_session['facebook_id'],
+                            login_session['access_token'])
             del login_session['facebook_id']
         del login_session['access_token']
         del login_session['username']
@@ -158,7 +153,6 @@ def displayItem(item_id):
     return render('item.html', item=item)
 
 
-
 @app.route('/edit-<int:item_id>', methods=['GET', 'POST'])
 @app.route('/newitem', methods=['GET', 'POST'])
 def newItem(item_id=None):
@@ -172,10 +166,12 @@ def newItem(item_id=None):
             category_id = Category.getCategoryID(item_category)
             user_id = login_session['user_id']
             if item_id:  # editting item
-                Item.updateItem(item_id, name, description, category_id, user_id)
+                Item.updateItem(item_id, name, description, category_id,
+                                user_id)
                 flash('Item %s Successfully Updated' % name)
             else:  # create new item
-                item_id = Item.createItem(name, description, category_id, user_id)
+                item_id = Item.createItem(name, description, category_id,
+                                          user_id)
                 flash('New Item %s Successfully Created' % name)
             return redirect("/item-%s" % str(item_id))
         else:  # take user back to form to fix missing data
@@ -186,7 +182,10 @@ def newItem(item_id=None):
                 name_error = "Name required"
             if not description:
                 description_error = "Description required"
-            return render('newItem.html', categories=categories, name=name, description=description, item_category=item_category, name_error=name_error, description_error=description_error)
+            return render('newItem.html', categories=categories, name=name,
+                          description=description, item_category=item_category,
+                          name_error=name_error,
+                          description_error=description_error)
 
     else:  # render form
         categories = Category.getAllCategories()
@@ -196,7 +195,8 @@ def newItem(item_id=None):
             name = item.name
             description = item.description
             item_category = item.category.name
-        return render('newItem.html', categories=categories, name=name, description=description, item_category=item_category)
+        return render('newItem.html', categories=categories, name=name,
+                      description=description, item_category=item_category)
 
 
 @app.route('/delete-<int:item_id>', methods=['GET', 'POST'])
