@@ -4,6 +4,19 @@
   Homepage
 {% endblock %}
 
+{% block navbar %}
+  {% if selected_category %}
+    <ul class="nav navbar-nav">
+    <li><a href="/category-{{selected_category.id}}/JSON">JSON data</a></li>
+    </ul>
+  {% else %}
+    <ul class="nav navbar-nav">
+    <li><a href="/JSON">JSON data</a></li>
+    </ul>
+  {% endif %}
+{% endblock %}
+
+
 {% block content %}
 
   <div class="row">

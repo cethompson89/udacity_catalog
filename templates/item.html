@@ -4,6 +4,12 @@
   {{item.name}}
 {% endblock %}
 
+{% block navbar %}
+  <ul class="nav navbar-nav">
+  <li><a href="/item-{{item.id}}/JSON">JSON data</a></li>
+  </ul>
+{% endblock %}
+
 {% block content %}
 
   <div class="container">

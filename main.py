@@ -225,6 +225,12 @@ def allJSON():
     return jsonify(Category=[c.serialize_with_items for c in categories])
 
 
+@app.route('/item-<int:item_id>/JSON')
+def itemJSON(item_id):
+    item = Item.getItemInfo(item_id)
+    return jsonify(Item=item.serialize)
+
+
 if __name__ == '__main__':
     app.secret_key = 'super_secret_key'
     app.debug = True
