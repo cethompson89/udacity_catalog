@@ -23,6 +23,8 @@
 
         <input type="hidden" name="item_id" value="{{ item.id }}">
 
+        <p class="form-control-static" style="color:red">{{ user_error }}</p>
+
         <p> Do you really want to delete {{item.name}}?</p>
 
         <div class="form-group">

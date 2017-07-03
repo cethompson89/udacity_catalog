@@ -7,7 +7,7 @@ import random
 import string
 import oath_logins.google as google
 import oath_logins.facebook as facebook
-from helper import render, test_state
+from helper import render, test_state, login_required
 
 app = Flask(__name__)
 
@@ -25,8 +25,12 @@ session = DBSession()
 def showHome(category_id=None):
         categories = Category.getAllCategories()
         if category_id:
-            selected_category = Category.getCategory(category_id)
-            items = Item.getByCategory(category_id)
+            try:
+                selected_category = Category.getCategory(category_id)
+                items = Item.getByCategory(category_id)
+            except:
+                selected_category = None
+                items = Item.getAllItems()
         else:
             selected_category = None
             items = Item.getAllItems()
@@ -135,9 +139,8 @@ def disconnect():
 
 
 @app.route('/category', methods=['GET', 'POST'])
+@login_required
 def newCategory():
-    if 'username' not in login_session:
-        return redirect('/login')
     if request.method == 'POST':
         category = request.form['category']
         Category.createCategory(category)
@@ -149,15 +152,18 @@ def newCategory():
 
 @app.route('/item-<int:item_id>', methods=['GET'])
 def displayItem(item_id):
-    item = Item.getItemInfo(item_id)
-    return render('item.html', item=item)
+    try:
+        item = Item.getItemInfo(item_id)
+        return render('item.html', item=item)
+    except:
+        return redirect(url_for('showHome'))
 
 
 @app.route('/edit-<int:item_id>', methods=['GET', 'POST'])
 @app.route('/newitem', methods=['GET', 'POST'])
+@login_required
 def newItem(item_id=None):
-    if 'username' not in login_session:
-        return redirect('/login')
+    categories = Category.getAllCategories()
     if request.method == 'POST':
         name = request.form['name']
         description = request.form['description']
@@ -166,16 +172,23 @@ def newItem(item_id=None):
             category_id = Category.getCategoryID(item_category)
             user_id = login_session['user_id']
             if item_id:  # editting item
-                Item.updateItem(item_id, name, description, category_id,
-                                user_id)
-                flash('Item %s Successfully Updated' % name)
+                item = Item.getItemInfo(item_id)
+                if user_id != item.user_id:  # invalid user
+                    user_error = "Not authorised to edit this object"
+                    return render('newItem.html', categories=categories,
+                                  name=name, description=description,
+                                  item_category=item_category,
+                                  user_error=user_error)
+                else:  # valid user
+                    Item.updateItem(item_id, name, description, category_id,
+                                    user_id)
+                    flash('Item %s Successfully Updated' % name)
             else:  # create new item
                 item_id = Item.createItem(name, description, category_id,
                                           user_id)
                 flash('New Item %s Successfully Created' % name)
             return redirect("/item-%s" % str(item_id))
         else:  # take user back to form to fix missing data
-            categories = Category.getAllCategories()
             name_error = ""
             description_error = ""
             if not name:
@@ -191,28 +204,40 @@ def newItem(item_id=None):
         categories = Category.getAllCategories()
         name, description, item_category = "", "", ""
         if item_id:
-            item = Item.getItemInfo(item_id)
-            name = item.name
-            description = item.description
-            item_category = item.category.name
-        return render('newItem.html', categories=categories, name=name,
-                      description=description, item_category=item_category)
+            try:
+                item = Item.getItemInfo(item_id)
+                name = item.name
+                description = item.description
+                item_category = item.category.name
+                return render('newItem.html', categories=categories, name=name,
+                              description=description,
+                              item_category=item_category)
+            except:
+                return redirect(url_for('showHome'))
 
 
 @app.route('/delete-<int:item_id>', methods=['GET', 'POST'])
+@login_required
 def deleteItem(item_id):
-    if 'username' not in login_session:
-        return redirect('/login')
     if request.method == 'POST':
         item_id = request.form['item_id']
-        Item.deleteItem(item_id)
-        return redirect(url_for('showHome'))
-    else:
+        user_id = login_session['user_id']
         item = Item.getItemInfo(item_id)
-        return render('delete.html', item=item)
+        if user_id != item.user_id:  # invalid user
+            user_error = "Not authorised to delete this object"
+            return render('delete.html', item=item, user_error=user_error)
+        else:  # valid user
+            Item.deleteItem(item_id)
+            return redirect(url_for('showHome'))
+
+    else:
+        try:
+            item = Item.getItemInfo(item_id)
+            return render('delete.html', item=item)
+        except:
+            return redirect(url_for('showHome'))
 
 
-#  Not linked to in site
 @app.route('/category-<int:category_id>/JSON')
 def categoryJSON(category_id):
     items = Item.getByCategory(category_id)

@@ -23,6 +23,8 @@
 
         <input type="hidden" name="item_id" value="{{ item_id }}">
 
+        <p class="form-control-static" style="color:red">{{ user_error }}</p>
+
         <div class="form-group">
           <label for="name">Item Name</label>
             <input type="text" class="form-control" name="name" id="name" placeholder="Item Name" value="{{ name }}">
